@@ -40,6 +40,7 @@ int main(int argc, char ** argv) {
   mkdir("app.app/Contents/MacOS", 0777);
 
   if (cc("base.m", "app.app/Contents/MacOS/base")) return 1;
+  if (cc("pipeline.m", "app.app/Contents/MacOS/pipeline")) return 1;
 
   return 0;
 }
