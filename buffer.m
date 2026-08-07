@@ -47,8 +47,8 @@ static void run() {
   NSError * err;
   NSString * src = @""
     "using namespace metal;"
-    "vertex float4 vtx(uint vid [[vertex_id]]) {"
-    "  return float4(vid & 1, (vid >> 1) & 1, 0, 1);"
+    "vertex float4 vtx(constant float & aspect [[buffer(0)]], uint vid [[vertex_id]]) {"
+    "  return float4(aspect * (vid & 1), (vid >> 1) & 1, 0, 1);"
     "}"
     "fragment float4 frg() {"
     "  return float4(0.3, 0.2, 0.1, 1);"
