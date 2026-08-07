@@ -21,8 +21,11 @@
 
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
 
+  float aspect = 600. / 800.;
+
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
   [enc setRenderPipelineState:self.pipeline];
+  [enc setVertexBytes:&aspect length:4 atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 
