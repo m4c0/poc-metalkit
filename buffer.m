@@ -13,6 +13,7 @@
 @interface POCViewController : NSViewController<MTKViewDelegate>
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
+@property (nonatomic,strong) id<MTLBuffer> buffer;
 @end
 @implementation POCViewController
 - (void)drawInMTKView:(MTKView *)view {
@@ -21,11 +22,11 @@
 
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
 
-  float aspect = 600. / 800.;
+  *(float *)self.buffer.contents = 0.67;
 
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
   [enc setRenderPipelineState:self.pipeline];
-  [enc setVertexBytes:&aspect length:4 atIndex:0];
+  [enc setVertexBuffer:self.buffer offset:0 atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 
@@ -71,6 +72,8 @@ static void run() {
     NSLog(@"Error creating pipeline: %@", err);
     return;
   }
+
+  vc.buffer = [view.device newBufferWithLength:4 options:MTLResourceStorageModeShared];
 
   NSWindow * w = [NSWindow windowWithContentViewController:vc];
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
