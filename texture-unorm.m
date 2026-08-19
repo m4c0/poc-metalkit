@@ -55,7 +55,7 @@ static void run() {
     "  return float4(vid & 1, (vid >> 1) & 1, 0, 1);"
     "}"
     "fragment float4 frg(texture2d<half> txt [[texture(0)]], sampler smp [[sampler(0)]]) {"
-    "  return float4(txt.sample(smp, float2(0.5, 0.5)));"
+    "  return float4(txt.sample(smp, float2(3, 4)));"
     "}";
   id <MTLLibrary> lib = [view.device newLibraryWithSource:src options:opts error:&err];
   if (err) {
@@ -80,12 +80,14 @@ static void run() {
   vc.texture = [view.device newTextureWithDescriptor:td];
 
   uint32_t bytes[16 * 16];
-  for (int i = 0; i < 16 * 16; i++) bytes[i] = 0xff5555ff;
+  for (int i = 0; i < 16 * 16; i++) bytes[i] = 0xff0000ff;
+  bytes[4 * 16 + 3] = 0xff9999ff;
 
   MTLRegion r = { {0,0,0}, {16,16,1} };
   [vc.texture replaceRegion:r mipmapLevel:0 withBytes:bytes bytesPerRow:16*4];
 
   MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
+  sd.normalizedCoordinates = NO;
   sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
   vc.sampler = [view.device newSamplerStateWithDescriptor:sd];
 
