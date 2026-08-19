@@ -13,6 +13,7 @@
 @interface POCViewController : NSViewController<MTKViewDelegate>
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
+@property (nonatomic,strong) id<MTLSamplerState> sampler;
 @property (nonatomic,strong) id<MTLTexture> texture;
 @end
 @implementation POCViewController
@@ -25,6 +26,7 @@
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
   [enc setRenderPipelineState:self.pipeline];
   [enc setFragmentTexture:self.texture atIndex:0];
+  [enc setFragmentSamplerState:self.sampler atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 
@@ -52,8 +54,7 @@ static void run() {
     "vertex float4 vtx(uint vid [[vertex_id]]) {"
     "  return float4(vid & 1, (vid >> 1) & 1, 0, 1);"
     "}"
-    "constexpr sampler smp(mag_filter::linear, min_filter::linear); "
-    "fragment float4 frg(texture2d<half> txt [[texture(0)]]) {"
+    "fragment float4 frg(texture2d<half> txt [[texture(0)]], sampler smp [[sampler(0)]]) {"
     "  return float4(txt.sample(smp, float2(0.5, 0.5)));"
     "}";
   id <MTLLibrary> lib = [view.device newLibraryWithSource:src options:opts error:&err];
@@ -83,6 +84,10 @@ static void run() {
 
   MTLRegion r = { {0,0,0}, {16,16,1} };
   [vc.texture replaceRegion:r mipmapLevel:0 withBytes:bytes bytesPerRow:16*4];
+
+  MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
+  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
+  vc.sampler = [view.device newSamplerStateWithDescriptor:sd];
 
   NSWindow * w = [NSWindow windowWithContentViewController:vc];
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
