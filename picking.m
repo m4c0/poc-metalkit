@@ -16,6 +16,17 @@
 @property (nonatomic,strong) id<MTLBuffer> buffer;
 @end
 @implementation POCViewController
+- (void)mouseDown:(NSEvent *)event {
+  NSView * v = self.view;
+  CGPoint liw = [event locationInWindow];
+  CGPoint p = [v convertPoint:liw fromView:nil];
+  NSLog(@"down %f %f", p.x, v.frame.size.height - p.y);
+
+  // TODO: render to an offscreen
+  // TODO: MTLBlitCommandEncoder
+  // TODO: read back
+}
+
 - (void)drawInMTKView:(MTKView *)view {
   MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
   if (rpd == nil) return;
