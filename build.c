@@ -26,6 +26,7 @@ static int run(char ** args) {
 static int cc(char * src, char * exe) {
   char * args[] = {
     "clang", "-Wall", "-g",
+    "-fmodules",
     "-framework", "AppKit",
     "-framework", "Metal",
     "-framework", "MetalKit",
@@ -44,6 +45,7 @@ int main(int argc, char ** argv) {
   if (cc("buffer.m",        "app.app/Contents/MacOS/buffer"        )) return 1;
   if (cc("texture.m",       "app.app/Contents/MacOS/texture"       )) return 1;
   if (cc("texture-unorm.m", "app.app/Contents/MacOS/texture-unorm" )) return 1;
+  if (cc("picking.m",       "app.app/Contents/MacOS/picking"       )) return 1;
 
   return 0;
 }
