@@ -13,7 +13,9 @@
 @interface POCViewController : NSViewController<MTKViewDelegate>
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
+@property (nonatomic,strong) id<MTLRenderPipelineState> pipelinePick;
 @property (nonatomic,strong) id<MTLBuffer> buffer;
+@property (nonatomic,strong) id<MTLBuffer> bufferPick;
 @end
 @implementation POCViewController
 - (void)mouseDown:(NSEvent *)event {
@@ -34,10 +36,12 @@
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
 
   *(float *)self.buffer.contents = 0.67;
+  *(int *)self.bufferPick.contents = 1;
 
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
   [enc setRenderPipelineState:self.pipeline];
   [enc setVertexBuffer:self.buffer offset:0 atIndex:0];
+  [enc setFragmentBuffer:self.bufferPick offset:0 atIndex:1];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 
@@ -65,8 +69,11 @@ static void run() {
     "vertex float4 vtx(constant float & aspect [[buffer(0)]], uint vid [[vertex_id]]) {"
     "  return float4(aspect * (vid & 1), (vid >> 1) & 1, 0, 1);"
     "}"
-    "fragment float4 frg() {"
-    "  return float4(0.3, 0.2, 0.1, 1);"
+    "fragment float4 frg(constant uint & pick [[buffer(1)]]) {"
+    "  return float4(pick == 1 ? 1.0 : 0.3, 0.2, 0.1, 1);"
+    "}"
+    "fragment uint frgPick() {"
+    "  return 1;"
     "}";
   id <MTLLibrary> lib = [view.device newLibraryWithSource:src options:opts error:&err];
   if (err) {
@@ -85,6 +92,7 @@ static void run() {
   }
 
   vc.buffer = [view.device newBufferWithLength:4 options:MTLResourceStorageModeShared];
+  vc.bufferPick = [view.device newBufferWithLength:4 options:MTLResourceStorageModeShared];
 
   NSWindow * w = [NSWindow windowWithContentViewController:vc];
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
